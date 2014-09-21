@@ -57,12 +57,12 @@ public class NavigationDrawerAdapter extends BaseAdapter {
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
         DrawerHolder drawerHolder;
-        if(convertView == null) {
+        if (convertView == null) {
             drawerHolder = new DrawerHolder();
             convertView = new DrawerView(mContext);
-            drawerHolder.titleTextView = (TextView) convertView.findViewById(R.id.title_text_view);
-            drawerHolder.drawer_image = (ImageView) convertView.findViewById(R.id.drawer_image);
-            drawerHolder.layout = (RelativeLayout) convertView.findViewById(R.id.drawer_relative);
+            //          drawerHolder.titleTextView = (TextView) convertView.findViewById(R.id.title_text_view);
+            //        drawerHolder.drawer_image = (ImageView) convertView.findViewById(R.id.drawer_image);
+            //      drawerHolder.layout = (RelativeLayout) convertView.findViewById(R.id.drawer_relative);
             ((DrawerView) convertView).setTag(drawerHolder, sectionsList.get(position), getSectionIcon(position));
         } else {
             drawerHolder = (DrawerHolder) convertView.getTag();
@@ -96,7 +96,7 @@ public class NavigationDrawerAdapter extends BaseAdapter {
 
         public DrawerView(Context context) {
             super(context);
-            inflate(context, R.layout.view_navigation_drawer, this);
+            //    inflate(context, R.layout.view_navigation_drawer, this);
         }
 
         public void setTag(DrawerHolder tag, String title, int imageId) {
