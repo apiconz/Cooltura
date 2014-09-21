@@ -3,6 +3,7 @@ package pe.gdgopenlima.cooltura.activities;
 import android.app.Activity;
 import android.app.Fragment;
 import android.app.FragmentManager;
+import android.app.ListFragment;
 import android.app.SearchManager;
 import android.content.Context;
 import android.content.Intent;
@@ -24,6 +25,7 @@ import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.android.gms.maps.CameraUpdateFactory;
@@ -38,6 +40,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import pe.gdgopenlima.cooltura.R;
+import pe.gdgopenlima.cooltura.adapters.PlaceListAdapter;
 import pe.gdgopenlima.cooltura.entities.Place;
 import pe.gdgopenlima.cooltura.helpers.Database;
 
@@ -151,11 +154,24 @@ public class MainActivity extends Activity {
 
     private void selectItem(int position) {
         // update the main content by replacing fragments
-        Fragment fragment = new MapsFragment();
+        Fragment fragment = null;
+        Bundle args;
+        switch (position) {
+            case 0:
+                fragment = new MapsFragment();
+                args = new Bundle();
+                args.putInt(MapsFragment.ARG_OPTION_NUMBER, position);
+                fragment.setArguments(args);
+                break;
+            case 1:
+                fragment = new PlaceListFragment();
+                args = new Bundle();
+                args.putInt(PlaceListFragment.ARG_PLACES_NUMBER, position);
+                fragment.setArguments(args);
 
-        Bundle args = new Bundle();
-        args.putInt(MapsFragment.ARG_OPTION_NUMBER, position);
-        fragment.setArguments(args);
+                break;
+        }
+
 
         FragmentManager fragmentManager = getFragmentManager();
         fragmentManager.beginTransaction().replace(R.id.content_frame, fragment).commit();
@@ -208,9 +224,7 @@ public class MainActivity extends Activity {
             int i = getArguments().getInt(ARG_OPTION_NUMBER);
             String option = getResources().getStringArray(R.array.options_array)[i];
 
-
             setUpMapIfNeeded();
-
 
             getActivity().setTitle(option);
             return rootView;
@@ -296,9 +310,6 @@ public class MainActivity extends Activity {
 
             // Zoom in the Google Map
             googleMap.animateCamera(CameraUpdateFactory.zoomTo(12));
-
-            // Setting latitude and longitude in the TextView tv_location
-            Toast.makeText(getActivity().getApplicationContext(), "Latitude:" + latitude + ", Longitude:" + longitude, Toast.LENGTH_SHORT);
         }
 
         @Override
@@ -316,4 +327,96 @@ public class MainActivity extends Activity {
 
         }
     }
+
+
+    public static class PlaceListFragment extends ListFragment implements
+            AdapterView.OnItemClickListener {
+        public static final String ARG_PLACES_NUMBER = "places_number";
+
+        public PlaceListFragment() {
+            // Empty constructor required for fragment subclasses
+        }
+
+        @Override
+        public View onCreateView(LayoutInflater inflater, ViewGroup container,
+                                 Bundle savedInstanceState) {
+            View rootView = inflater.inflate(R.layout.fragment_list, container, false);
+
+            return rootView;
+        }
+
+        @Override
+        public void onCreate(Bundle savedInstanceState) {
+            super.onCreate(savedInstanceState);
+
+            Database db = new Database(getActivity().getApplicationContext());
+            List<Place> places = new ArrayList<Place>();
+            try {
+                Dao<Place, Integer> dao = db.getDao(Place.class);
+                places = dao.queryForAll();
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+
+            // Establecemos el Adapter a la Lista del Fragment
+            setListAdapter(new PlaceListAdapter(getActivity(), places));
+        }
+
+        @Override
+        public void onListItemClick(ListView l, View v, int position, long id) {
+            TextView txtPlaceId = (TextView) v.findViewById(R.id.txtPlaceId);
+            TextView txtPlaceName = (TextView) v.findViewById(R.id.txtPlaceTitle);
+            TextView txtPlaceAddress = (TextView) v.findViewById(R.id.txtPlaceAddress);
+            TextView txtPlaceDistrict = (TextView) v.findViewById(R.id.txtPlaceDistrict);
+            TextView txtPlaceDescription = (TextView) v.findViewById(R.id.txtPlaceDescription);
+
+            PlaceDetailtFragment fragment = new PlaceDetailtFragment(); //  object of next fragment
+            Bundle bundle = new Bundle();
+            bundle.putString("placeName", (String) txtPlaceName.getText());
+            bundle.putString("placeAddress", (String) txtPlaceAddress.getText());
+            bundle.putString("placeDistrict", (String) txtPlaceDistrict.getText());
+            bundle.putString("placeDescription", (String) txtPlaceDescription.getText());
+            fragment.setArguments(bundle);
+
+            FragmentManager fragmentManager = getFragmentManager();
+            fragmentManager.beginTransaction().replace(R.id.content_frame, fragment).commit();
+
+        }
+
+        @Override
+        public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
+
+        }
+    }
+
+    public static class PlaceDetailtFragment extends Fragment {
+        public static final String ARG_PLACE_NUMBER = "place_number";
+
+        public PlaceDetailtFragment() {
+            // Empty constructor required for fragment subclasses
+        }
+
+        @Override
+        public View onCreateView(LayoutInflater inflater, ViewGroup container,
+                                 Bundle savedInstanceState) {
+            View rootView = inflater.inflate(R.layout.fragment_place_detail, container, false);
+            int i = getArguments().getInt(ARG_PLACE_NUMBER);
+
+            Bundle bundle = this.getArguments();
+
+            TextView txtName = (TextView) rootView.findViewById(R.id.txtDetailName);
+            TextView txtAddress = (TextView) rootView.findViewById(R.id.txtDetailAddress);
+            TextView txtDistrict = (TextView) rootView.findViewById(R.id.txtDetailDistrict);
+            TextView txtDescription = (TextView) rootView.findViewById(R.id.txtDetailDescription);
+
+            txtName.setText(bundle.getString("placeName"));
+            txtAddress.setText(bundle.getString("placeAddress"));
+            txtDistrict.setText(bundle.getString("placeDistrict"));
+            txtDescription.setText(bundle.getString("placeDescription"));
+
+            return rootView;
+        }
+    }
+
+
 }

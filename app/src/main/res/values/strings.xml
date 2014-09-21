@@ -25,4 +25,9 @@
     <string name="action_websearch">Web search</string>
     <string name="app_not_available">Sorry, there\'s no web browser available</string>
 
+    <string name="place_detail_name">Nombre</string>
+    <string name="place_detail_address">Dirección</string>
+    <string name="place_detail_district">Distrito</string>
+    <string name="place_detail_description">Descripción</string>
+
 </resources>
